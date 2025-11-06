@@ -78,7 +78,9 @@ const COMMON_BENEFITS: Omit<CommonBenefit, "enabled" | "amount">[] = [
 
 export default function Home() {
   const [cashCompensation, setCashCompensation] = useState<string>("");
+  const [hasBonus, setHasBonus] = useState<boolean>(false);
   const [cashBonus, setCashBonus] = useState<string>("");
+  const [bonusType, setBonusType] = useState<"percentage" | "amount">("amount");
   const [hasEquity, setHasEquity] = useState<boolean>(false);
   const [numberOfShares, setNumberOfShares] = useState<string>("");
   const [strikePrice, setStrikePrice] = useState<string>("");
@@ -172,7 +174,11 @@ export default function Home() {
 
   // Calculations
   const cashBase = parseFloat(cashCompensation) || 0;
-  const bonus = parseFloat(cashBonus) || 0;
+  const bonus = hasBonus
+    ? bonusType === "percentage"
+      ? (cashBase * (parseFloat(cashBonus) || 0)) / 100
+      : (parseFloat(cashBonus) || 0)
+    : 0;
   const cash = cashBase + bonus;
   const shares = parseFloat(numberOfShares) || 0;
   const strike = parseFloat(strikePrice) || 0;
@@ -370,43 +376,116 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="cash">Annual Salary</Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                    $
-                  </span>
-                  <Input
-                    id="cash"
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="150000"
-                    className="pl-7"
-                    value={cashCompensation}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      // Only allow digits, empty string, or valid number format
-                      if (value === "" || /^\d*\.?\d*$/.test(value)) {
-                        setCashCompensation(value);
-                      }
-                    }}
-                  />
+            <div className="space-y-2">
+              <Label htmlFor="cash">Annual Salary</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  $
+                </span>
+                <Input
+                  id="cash"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="150000"
+                  className="pl-7"
+                  value={cashCompensation}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Only allow digits, empty string, or valid number format
+                    if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                      setCashCompensation(value);
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Cash Bonus / Variable Compensation Card (Optional) */}
+        <Card className="border-l-4" style={{ borderLeftColor: '#6A9FB5' }}>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <CardTitle className="flex items-center gap-2" style={{ color: '#0A1F44' }}>
+                  <DollarSign className="h-5 w-5" style={{ color: '#6A9FB5' }} />
+                  Cash Bonus / Variable Compensation (Optional)
+                </CardTitle>
+                <CardDescription>
+                  Include bonus, commission, or other variable cash compensation
+                </CardDescription>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="has-bonus"
+                  checked={hasBonus}
+                  onCheckedChange={(checked) => setHasBonus(checked as boolean)}
+                />
+                <Label htmlFor="has-bonus" className="cursor-pointer font-normal">
+                  I receive bonus/variable comp
+                </Label>
+              </div>
+            </div>
+          </CardHeader>
+          {hasBonus && (
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-4 p-3 bg-muted/30 rounded-lg">
+                <Label className="text-sm font-medium">Bonus Type:</Label>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="bonus-percentage"
+                      checked={bonusType === "percentage"}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setBonusType("percentage");
+                          setCashBonus("");
+                        }
+                      }}
+                    />
+                    <Label htmlFor="bonus-percentage" className="cursor-pointer font-normal">
+                      Percentage of salary
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="bonus-amount"
+                      checked={bonusType === "amount"}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setBonusType("amount");
+                          setCashBonus("");
+                        }
+                      }}
+                    />
+                    <Label htmlFor="bonus-amount" className="cursor-pointer font-normal">
+                      Fixed dollar amount
+                    </Label>
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="bonus">Cash Bonus / Variable Compensation (Optional)</Label>
+                <Label htmlFor="bonus">
+                  {bonusType === "percentage" ? "Bonus Percentage" : "Annual Bonus Amount"}
+                </Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                    $
-                  </span>
+                  {bonusType === "amount" && (
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                      $
+                    </span>
+                  )}
+                  {bonusType === "percentage" && (
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                      %
+                    </span>
+                  )}
                   <Input
                     id="bonus"
                     type="text"
                     inputMode="numeric"
-                    placeholder="25000"
-                    className="pl-7"
+                    placeholder={bonusType === "percentage" ? "20" : "25000"}
+                    className={bonusType === "amount" ? "pl-7" : "pr-7"}
                     value={cashBonus}
                     onChange={(e) => {
                       const value = e.target.value;
@@ -418,11 +497,13 @@ export default function Home() {
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Annual bonus, commission, or other variable cash compensation
+                  {bonusType === "percentage"
+                    ? `Enter the percentage of your base salary that you receive as bonus (e.g., 20 for 20%)${cashBase > 0 ? `. This equals ${formatCurrency(bonus)} annually.` : ""}`
+                    : "The total amount of bonus, commission, or other variable cash compensation you receive annually"}
                 </p>
               </div>
-            </div>
-          </CardContent>
+            </CardContent>
+          )}
         </Card>
 
         {/* Equity Card (Optional) */}
@@ -837,7 +918,14 @@ export default function Home() {
 
               {bonus > 0 && (
                 <div className="flex justify-between items-center py-2 border-t">
-                  <span className="text-muted-foreground">Cash Bonus / Variable</span>
+                  <div className="space-y-1">
+                    <span className="text-muted-foreground">Cash Bonus / Variable</span>
+                    {bonusType === "percentage" && cashBonus && (
+                      <p className="text-xs text-muted-foreground">
+                        {cashBonus}% of {formatCurrency(cashBase)}
+                      </p>
+                    )}
+                  </div>
                   <span className="font-semibold">{formatCurrency(bonus)}</span>
                 </div>
               )}
