@@ -188,11 +188,11 @@ export default function Home() {
     : 0;
   
   // IRS limit validations
-  const exceeds401kLimit = match401kValue > IRS_LIMITS.CONTRIB_401K_TOTAL;
+  const exceeds401kLimit = match401kValue > IRS_LIMITS.CONTRIB_401K_EMPLOYEE;
   
   const hsaFsaBenefit = commonBenefits.find(b => b.id === "hsa");
   const hsaFsaAmount = hsaFsaBenefit?.enabled ? hsaFsaBenefit.amount : 0;
-  const exceedsHsaFsaLimit = hsaFsaAmount > IRS_LIMITS.HSA_FAMILY; // Using family limit as the maximum
+  const exceedsHsaFsaLimit = hsaFsaAmount > IRS_LIMITS.FSA; // Using FSA limit as the smallest limit
   
   const totalBenefits = enabledCommonBenefitsTotal + customBenefitsTotal + match401kValue;
   
@@ -593,7 +593,7 @@ export default function Home() {
                   <div className="flex items-start gap-2 p-3 mt-2 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900">
                     <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-500 mt-0.5 flex-shrink-0" />
                     <p className="text-xs text-amber-800 dark:text-amber-200">
-                      <strong>Warning:</strong> This 401(k) contribution ({formatCurrency(match401kValue)}) exceeds the IRS annual limit of {formatCurrency(IRS_LIMITS.CONTRIB_401K_TOTAL)} for combined employee and employer contributions ({IRS_LIMITS.YEAR}).
+                      <strong>Warning:</strong> This 401(k) contribution ({formatCurrency(match401kValue)}) exceeds the IRS annual employee contribution limit of {formatCurrency(IRS_LIMITS.CONTRIB_401K_EMPLOYEE)} ({IRS_LIMITS.YEAR}). The combined employee and employer contribution limit is {formatCurrency(IRS_LIMITS.CONTRIB_401K_TOTAL)}.
                     </p>
                   </div>
                 )}
@@ -693,7 +693,7 @@ export default function Home() {
                         <div className="flex items-start gap-2 p-2 mt-2 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900">
                           <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-500 mt-0.5 flex-shrink-0" />
                           <p className="text-xs text-amber-800 dark:text-amber-200">
-                            <strong>Warning:</strong> This exceeds the IRS annual HSA family limit of {formatCurrency(IRS_LIMITS.HSA_FAMILY)} (individual: {formatCurrency(IRS_LIMITS.HSA_INDIVIDUAL)}) or FSA limit of {formatCurrency(IRS_LIMITS.FSA)} ({IRS_LIMITS.YEAR}).
+                            <strong>Warning:</strong> This exceeds the IRS annual FSA limit of {formatCurrency(IRS_LIMITS.FSA)} ({IRS_LIMITS.YEAR}). HSA limits are {formatCurrency(IRS_LIMITS.HSA_INDIVIDUAL)} (individual) and {formatCurrency(IRS_LIMITS.HSA_FAMILY)} (family).
                           </p>
                         </div>
                       )}

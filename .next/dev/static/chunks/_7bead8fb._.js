@@ -1484,10 +1484,10 @@ function Home() {
     const customBenefitsTotal = customBenefits.reduce((sum, b)=>sum + b.amount, 0);
     const match401kValue = has401k ? match401kType === "percentage" ? cash * (parseFloat(match401k) || 0) / 100 : parseFloat(match401k) || 0 : 0;
     // IRS limit validations
-    const exceeds401kLimit = match401kValue > IRS_LIMITS.CONTRIB_401K_TOTAL;
+    const exceeds401kLimit = match401kValue > IRS_LIMITS.CONTRIB_401K_EMPLOYEE;
     const hsaFsaBenefit = commonBenefits.find((b)=>b.id === "hsa");
     const hsaFsaAmount = hsaFsaBenefit?.enabled ? hsaFsaBenefit.amount : 0;
-    const exceedsHsaFsaLimit = hsaFsaAmount > IRS_LIMITS.HSA_FAMILY; // Using family limit as the maximum
+    const exceedsHsaFsaLimit = hsaFsaAmount > IRS_LIMITS.FSA; // Using FSA limit as the smallest limit
     const totalBenefits = enabledCommonBenefitsTotal + customBenefitsTotal + match401kValue;
     const equityValue = hasEquity ? shares * (fmv - strike) : 0;
     const totalCompensation = cash + equityValue + totalBenefits;
@@ -2498,11 +2498,13 @@ function Home() {
                                                             }, this),
                                                             " This 401(k) contribution (",
                                                             formatCurrency(match401kValue),
-                                                            ") exceeds the IRS annual limit of ",
-                                                            formatCurrency(IRS_LIMITS.CONTRIB_401K_TOTAL),
-                                                            " for combined employee and employer contributions (",
+                                                            ") exceeds the IRS annual employee contribution limit of ",
+                                                            formatCurrency(IRS_LIMITS.CONTRIB_401K_EMPLOYEE),
+                                                            " (",
                                                             IRS_LIMITS.YEAR,
-                                                            ")."
+                                                            "). The combined employee and employer contribution limit is ",
+                                                            formatCurrency(IRS_LIMITS.CONTRIB_401K_TOTAL),
+                                                            "."
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/page.tsx",
@@ -2757,15 +2759,15 @@ function Home() {
                                                                                 lineNumber: 696,
                                                                                 columnNumber: 29
                                                                             }, this),
-                                                                            " This exceeds the IRS annual HSA family limit of ",
-                                                                            formatCurrency(IRS_LIMITS.HSA_FAMILY),
-                                                                            " (individual: ",
-                                                                            formatCurrency(IRS_LIMITS.HSA_INDIVIDUAL),
-                                                                            ") or FSA limit of ",
+                                                                            " This exceeds the IRS annual FSA limit of ",
                                                                             formatCurrency(IRS_LIMITS.FSA),
                                                                             " (",
                                                                             IRS_LIMITS.YEAR,
-                                                                            ")."
+                                                                            "). HSA limits are ",
+                                                                            formatCurrency(IRS_LIMITS.HSA_INDIVIDUAL),
+                                                                            " (individual) and ",
+                                                                            formatCurrency(IRS_LIMITS.HSA_FAMILY),
+                                                                            " (family)."
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/app/page.tsx",
