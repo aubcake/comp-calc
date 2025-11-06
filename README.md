@@ -67,20 +67,6 @@ To run the production build locally:
 npm run start
 ```
 
-## Project Structure
-
-```
-proj-compcalc/
-├── app/
-│   ├── page.tsx          # Main calculator component
-│   ├── layout.tsx        # Root layout
-│   └── globals.css       # Global styles
-├── components/
-│   └── ui/               # shadcn/ui components
-├── lib/
-│   └── salary-data.ts    # Occupation and metro area data
-└── package.json         # Dependencies and scripts
-```
 
 ## Available Scripts
 

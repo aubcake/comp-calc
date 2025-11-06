@@ -127,6 +127,19 @@ export default function Home() {
     );
   };
 
+  const handleCustomBenefitAmountChange = (id: string, value: string) => {
+    // Allow empty string or just a minus sign while typing
+    if (value === "" || value === "-") {
+      updateCustomBenefitAmount(id, 0);
+      return;
+    }
+    // Parse the value, but only update if it's a valid number
+    const numValue = Number(value);
+    if (!isNaN(numValue) && isFinite(numValue) && value.trim() !== "") {
+      updateCustomBenefitAmount(id, numValue);
+    }
+  };
+
   const toggleCommonBenefit = (id: string, enabled: boolean) => {
     setCommonBenefits(
       commonBenefits.map((benefit) =>
@@ -141,6 +154,19 @@ export default function Home() {
         benefit.id === id ? { ...benefit, amount } : benefit
       )
     );
+  };
+
+  const handleCommonBenefitAmountChange = (id: string, value: string) => {
+    // Allow empty string or just a minus sign while typing
+    if (value === "" || value === "-") {
+      updateCommonBenefitAmount(id, 0);
+      return;
+    }
+    // Parse the value, but only update if it's a valid number
+    const numValue = Number(value);
+    if (!isNaN(numValue) && isFinite(numValue) && value.trim() !== "") {
+      updateCommonBenefitAmount(id, numValue);
+    }
   };
 
   // Calculations
@@ -349,11 +375,18 @@ export default function Home() {
                 </span>
                 <Input
                   id="cash"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   placeholder="150000"
                   className="pl-7"
                   value={cashCompensation}
-                  onChange={(e) => setCashCompensation(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Only allow digits, empty string, or valid number format
+                    if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                      setCashCompensation(value);
+                    }
+                  }}
                 />
               </div>
             </div>
@@ -392,10 +425,16 @@ export default function Home() {
                   <Label htmlFor="shares">Number of Shares</Label>
                   <Input
                     id="shares"
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     placeholder="10000"
                     value={numberOfShares}
-                    onChange={(e) => setNumberOfShares(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                        setNumberOfShares(value);
+                      }
+                    }}
                   />
                 </div>
 
@@ -407,12 +446,17 @@ export default function Home() {
                     </span>
                     <Input
                       id="strike"
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
                       placeholder="1.00"
-                      step="0.01"
                       className="pl-7"
                       value={strikePrice}
-                      onChange={(e) => setStrikePrice(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                          setStrikePrice(value);
+                        }
+                      }}
                     />
                   </div>
                 </div>
@@ -426,12 +470,17 @@ export default function Home() {
                   </span>
                   <Input
                     id="fmv"
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     placeholder="5.00"
-                    step="0.01"
                     className="pl-7"
                     value={fairMarketValue}
-                    onChange={(e) => setFairMarketValue(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                        setFairMarketValue(value);
+                      }
+                    }}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -522,13 +571,17 @@ export default function Home() {
                   )}
                   <Input
                     id="401k-match"
-                    type="number"
+                    type="text"
+                    inputMode={match401kType === "percentage" ? "numeric" : "numeric"}
                     placeholder={match401kType === "percentage" ? "5" : "7500"}
                     className={match401kType === "amount" ? "pl-7" : "pr-7"}
                     value={match401k}
-                    onChange={(e) => setMatch401k(e.target.value)}
-                    step={match401kType === "percentage" ? "0.1" : "1"}
-                    max={match401kType === "percentage" ? "100" : undefined}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                        setMatch401k(value);
+                      }
+                    }}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -610,16 +663,27 @@ export default function Home() {
                               $
                             </span>
                             <Input
-                              type="number"
+                              type="text"
+                              inputMode="numeric"
                               placeholder="0"
                               className="h-8 pl-5 text-sm"
-                              value={benefit.enabled ? benefit.amount : ""}
-                              onChange={(e) =>
-                                updateCommonBenefitAmount(
-                                  benefit.id,
-                                  parseFloat(e.target.value) || 0
-                                )
-                              }
+                              value={benefit.enabled ? (benefit.amount === 0 ? "" : String(benefit.amount)) : ""}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                  handleCommonBenefitAmountChange(
+                                    benefit.id,
+                                    val
+                                  );
+                                }
+                              }}
+                              onBlur={(e) => {
+                                // Ensure we have a valid number on blur
+                                const val = e.target.value.trim();
+                                if (val === "" || val === "-") {
+                                  updateCommonBenefitAmount(benefit.id, 0);
+                                }
+                              }}
                               disabled={!benefit.enabled}
                             />
                           </div>
@@ -685,16 +749,27 @@ export default function Home() {
                           </span>
                           <Input
                             id={`benefit-amount-${benefit.id}`}
-                            type="number"
+                            type="text"
+                            inputMode="numeric"
                             placeholder="0"
                             className="pl-7"
-                            value={benefit.amount || ""}
-                            onChange={(e) =>
-                              updateCustomBenefitAmount(
-                                benefit.id,
-                                parseFloat(e.target.value) || 0
-                              )
-                            }
+                            value={benefit.amount === 0 ? "" : String(benefit.amount)}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                handleCustomBenefitAmountChange(
+                                  benefit.id,
+                                  val
+                                );
+                              }
+                            }}
+                            onBlur={(e) => {
+                              // Ensure we have a valid number on blur
+                              const val = e.target.value.trim();
+                              if (val === "" || val === "-") {
+                                updateCustomBenefitAmount(benefit.id, 0);
+                              }
+                            }}
                           />
                         </div>
                       </div>
