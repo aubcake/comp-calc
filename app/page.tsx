@@ -78,6 +78,7 @@ const COMMON_BENEFITS: Omit<CommonBenefit, "enabled" | "amount">[] = [
 
 export default function Home() {
   const [cashCompensation, setCashCompensation] = useState<string>("");
+  const [cashBonus, setCashBonus] = useState<string>("");
   const [hasEquity, setHasEquity] = useState<boolean>(false);
   const [numberOfShares, setNumberOfShares] = useState<string>("");
   const [strikePrice, setStrikePrice] = useState<string>("");
@@ -170,7 +171,9 @@ export default function Home() {
   };
 
   // Calculations
-  const cash = parseFloat(cashCompensation) || 0;
+  const cashBase = parseFloat(cashCompensation) || 0;
+  const bonus = parseFloat(cashBonus) || 0;
+  const cash = cashBase + bonus;
   const shares = parseFloat(numberOfShares) || 0;
   const strike = parseFloat(strikePrice) || 0;
   const fmv = parseFloat(fairMarketValue) || 0;
@@ -367,27 +370,56 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <Label htmlFor="cash">Annual Salary</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  $
-                </span>
-                <Input
-                  id="cash"
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="150000"
-                  className="pl-7"
-                  value={cashCompensation}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Only allow digits, empty string, or valid number format
-                    if (value === "" || /^\d*\.?\d*$/.test(value)) {
-                      setCashCompensation(value);
-                    }
-                  }}
-                />
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="cash">Annual Salary</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    $
+                  </span>
+                  <Input
+                    id="cash"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="150000"
+                    className="pl-7"
+                    value={cashCompensation}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Only allow digits, empty string, or valid number format
+                      if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                        setCashCompensation(value);
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="bonus">Cash Bonus / Variable Compensation (Optional)</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    $
+                  </span>
+                  <Input
+                    id="bonus"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="25000"
+                    className="pl-7"
+                    value={cashBonus}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Only allow digits, empty string, or valid number format
+                      if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                        setCashBonus(value);
+                      }
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Annual bonus, commission, or other variable cash compensation
+                </p>
               </div>
             </div>
           </CardContent>
@@ -799,7 +831,19 @@ export default function Home() {
           <CardContent className="space-y-4">
             <div className="space-y-3">
               <div className="flex justify-between items-center py-2">
-                <span className="text-muted-foreground">Cash Compensation</span>
+                <span className="text-muted-foreground">Base Salary</span>
+                <span className="font-semibold">{formatCurrency(cashBase)}</span>
+              </div>
+
+              {bonus > 0 && (
+                <div className="flex justify-between items-center py-2 border-t">
+                  <span className="text-muted-foreground">Cash Bonus / Variable</span>
+                  <span className="font-semibold">{formatCurrency(bonus)}</span>
+                </div>
+              )}
+
+              <div className="flex justify-between items-center py-2 border-t-2 border-primary/20">
+                <span className="font-semibold">Total Cash Compensation</span>
                 <span className="font-semibold">{formatCurrency(cash)}</span>
               </div>
               
@@ -952,7 +996,7 @@ export default function Home() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="p-4 rounded-lg bg-muted/50 space-y-1">
                   <div className="text-xs text-muted-foreground uppercase tracking-wide">
-                    Your Cash Salary
+                    Your Total Cash Compensation
                   </div>
                   <div className="text-2xl font-bold">{formatCurrency(cash)}</div>
                 </div>
